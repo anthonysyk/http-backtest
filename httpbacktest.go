@@ -2,6 +2,7 @@ package httpbacktest
 
 import (
 	"fmt"
+	"github.com/anthonysyk/http-backtest/format"
 	"github.com/dariubs/percent"
 	"github.com/go-resty/resty/v2"
 )
@@ -11,7 +12,7 @@ type Env struct {
 	Headers map[string]string
 }
 
-func (c *Client) Run(name string, URLs []string, envA, envB Env) *Result {
+func (c *Client) Run(name string, URLs []string, envA, envB Env, comparator format.Comparator) *Result {
 	uniqueURLs := make(map[string]int)
 	for _, URL := range URLs {
 		uniqueURLs[URL]++
@@ -19,6 +20,7 @@ func (c *Client) Run(name string, URLs []string, envA, envB Env) *Result {
 
 	result := &Result{
 		Name:           name,
+		TotalRequests:  len(URLs),
 		BodyEquivalent: make(map[string]int),
 		EnvironmentDetailsA: EnvironmentDetails{
 			StatusCodes: make(map[int]int),
@@ -40,12 +42,18 @@ func (c *Client) Run(name string, URLs []string, envA, envB Env) *Result {
 		}
 		if responseA != nil && responseB != nil {
 			compareStatusCodes(responseA, responseB, result)
-			compareJSON(responseA, responseB, result)
+			bodyMatched, comment := comparator.Compare(responseA, responseB)
+			result.BodyEquivalent[comment]++
+			if bodyMatched {
+				result.BodyMatched++
+			} else {
+				result.BodyNoMatched++
+			}
 		}
 	}
 
-	result.StatusCodeSimilarity = fmt.Sprintf("%v%", percent.PercentOf(result.StatusMatched, result.UniqueURLs))
-	result.BodySimilarity = fmt.Sprintf("%v%", percent.PercentOf(result.BodyMatched, result.UniqueURLs))
+	result.StatusCodeSimilarity = fmt.Sprintf("%v%%", percent.PercentOf(result.StatusMatched, result.UniqueURLs))
+	result.BodySimilarity = fmt.Sprintf("%v%%", percent.PercentOf(result.BodyMatched, result.UniqueURLs))
 	return result
 }
 
@@ -80,6 +88,6 @@ func (fr *FinalResult) ProcessTotal() {
 		fr.TotalUniqueURLs += d.UniqueURLs
 	}
 
-	fr.TotalBodySimilarity = fmt.Sprintf("%v%", percent.PercentOf(fr.TotalBodyMatched, fr.TotalUniqueURLs))
-	fr.TotalStatusSimilarity = fmt.Sprintf("%v%", percent.PercentOf(fr.TotalStatusMatched, fr.TotalUniqueURLs))
+	fr.TotalBodySimilarity = fmt.Sprintf("%v%%", percent.PercentOf(fr.TotalBodyMatched, fr.TotalUniqueURLs))
+	fr.TotalStatusSimilarity = fmt.Sprintf("%v%%", percent.PercentOf(fr.TotalStatusMatched, fr.TotalUniqueURLs))
 }

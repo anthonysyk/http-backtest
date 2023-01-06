@@ -1,4 +1,4 @@
-package httpbacktest
+package format
 
 import (
 	"bytes"
@@ -8,7 +8,9 @@ import (
 	"net/http"
 )
 
-func compareJSON(responseA, responseB *resty.Response, result *Result) {
+type JSON struct{}
+
+func (f JSON) Compare(responseA, responseB *resty.Response) (bool, string) {
 	if responseA.StatusCode() == http.StatusOK && responseB.StatusCode() == http.StatusOK {
 		bodyA := new(bytes.Buffer)
 		_ = json.Compact(bodyA, responseA.Body())
@@ -18,15 +20,7 @@ func compareJSON(responseA, responseB *resty.Response, result *Result) {
 
 		opts := jsondiff.DefaultJSONOptions()
 		diff, _ := jsondiff.Compare(bodyA.Bytes(), bodyB.Bytes(), &opts)
-
-		result.BodyEquivalent[diff.String()]++
-
-		if diff == jsondiff.FullMatch {
-			result.BodyMatched++
-		} else {
-			result.BodyNoMatched++
-		}
-	} else {
-		result.BodyMatched++
+		return diff == jsondiff.FullMatch, diff.String()
 	}
+	return true, "status code different"
 }

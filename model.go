@@ -1,29 +1,14 @@
 package httpbacktest
 
 import (
+	"encoding/json"
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/ratelimit"
 )
 
-type BodyFormat string
-
-const (
-	BodyFormatJSON = "json"
-	BodyFormatXML  = "xml"
-	BodyFormatHTML = "html"
-	BodyFormatCSV  = "csv"
-)
-
-type Environment struct {
-	Name    string
-	Headers map[string]string
-}
-
 type Client struct {
 	http *resty.Client
 	rl   ratelimit.Limiter
-	envs []Environment
-	body BodyFormat
 }
 
 func NewHttpBacktestClient(requestPerSecond int) *Client {
@@ -46,6 +31,11 @@ type Result struct {
 	BodyEquivalent       map[string]int     `json:"bodyEquivalent"`
 	EnvironmentDetailsA  EnvironmentDetails `json:"environmentDetailsA"`
 	EnvironmentDetailsB  EnvironmentDetails `json:"environmentDetailsB"`
+}
+
+func (r Result) JSON() string {
+	b, _ := json.Marshal(r)
+	return string(b)
 }
 
 type EnvironmentDetails struct {
