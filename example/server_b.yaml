@@ -1,0 +1,58 @@
+version: 1.0
+paths:
+  /health:
+    GET:
+      200:
+        body: |-
+          {"status":"OK"}
+  /top-movies:
+    GET:
+      200:
+        body: |-
+          ["The Shawshank Redemption","The Godfather","The Godfather: Part II","The Dark Knight","12 Angry Men","Schindler's List","The Lord of the Rings: The Return of the King","Pulp Fiction","The Good, the Bad and the Ugly","Fight Club"]
+  /movies/3120O3:
+    GET:
+      200:
+        body: |-
+          {
+            "title": "The Godfather",
+            "description": "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+            "duration": 175,
+            "actors": [
+              "Marlon Brando",
+              "Al Pacino",
+              "James Caan"
+            ]
+          }
+  /movies/10239:
+    GET:
+      200:
+        body: |-
+          {
+            "title": "Inception",
+            "description": "A thief, who steals corporate secrets through the use of dream-sharing technology, is given the inverse task of planting an idea into the mind of a CEO.",
+            "duration": 148,
+            "actors": [
+              "Leonardo DiCaprio",
+              "Joseph Gordon-Levitt",
+              "Ellen Page"
+            ]
+          }
+  /movies/04390923:
+    GET:
+      404:
+        body:
+  /movies/0930943:
+    GET:
+      200:
+        body: |-
+          {
+            "title": "The Dark Knight",
+            "description": "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+            "duration": 152,
+            "actors": [
+              "Christian Bale",
+              "Heath Ledger",
+              "Aaron Eckhart"
+            ]
+          }
